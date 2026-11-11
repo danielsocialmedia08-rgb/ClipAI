@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>ClipAI — Convierte videos en clips</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#"><span class="brand-mark">C</span><span>Clip<span class="brand-accent">AI</span></span></a>
+      <div class="workspace-label">ESPACIO DE TRABAJO</div>
+      <nav>
+        <a class="nav-item active" href="#"><span>▦</span> Crear clips</a>
+        <a class="nav-item" href="#how"><span>✧</span> Cómo funciona</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="help-card"><div class="help-icon">✦</div><strong>Tu contenido, en grande.</strong><p>Convierte videos largos en momentos que merecen compartirse.</p></div>
+        <div class="profile"><div class="avatar">C</div><div><strong>Mi espacio</strong><small>Plan inicial</small></div><span class="more">•••</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar"><div class="breadcrumb">ClipAI <span>/</span> <strong>Crear clips</strong></div><div class="top-actions"><span class="status-dot"></span><span>Procesamiento local</span><div class="top-avatar">C</div></div></header>
+      <section class="welcome">
+        <div><div class="eyebrow"><span class="spark">✦</span> ESTUDIO DE VIDEO INTELIGENTE</div><h1>Convierte videos largos<br><span>en clips increíbles.</span></h1><p class="intro">Sube un video, elige el fragmento y prepara contenido listo para compartir.</p></div>
+        <div class="welcome-art"><div class="art-ring ring-one"></div><div class="art-ring ring-two"></div><div class="play-tile">▶</div><span class="art-spark spark-a">✦</span><span class="art-spark spark-b">✧</span></div>
+      </section>
+
+      <section class="creator-grid">
+        <div class="panel source-panel">
+          <div class="panel-heading"><div><div class="step">PASO 01</div><h2>Agrega tu video</h2></div><span class="heading-icon">↗</span></div>
+          <div class="source-tabs"><button class="tab active" data-tab="upload">Subir archivo</button><button class="tab" data-tab="youtube">Enlace de YouTube</button></div>
+          <div id="uploadPane" class="dropzone">
+            <input id="videoFile" type="file" accept="video/*" hidden />
+            <div class="upload-icon">↑</div><strong>Arrastra tu video aquí</strong><p>o <button class="text-button" id="browseBtn">explora tus archivos</button></p><small>MP4, MOV, WEBM · El procesamiento se realiza en tu navegador</small>
+          </div>
+          <div id="youtubePane" class="youtube-pane hidden">
+            <label for="youtubeUrl">URL del video</label><div class="url-input"><span>▶</span><input id="youtubeUrl" type="url" placeholder="https://www.youtube.com/watch?v=..." /><button id="checkYoutube" aria-label="Comprobar enlace">→</button></div>
+            <p class="hint">La importación directa desde YouTube estará disponible cuando conectemos el servicio de procesamiento. Por ahora puedes subir un archivo de video.</p>
+          </div>
+          <div id="fileInfo" class="file-info hidden"><div class="file-icon">▶</div><div class="file-details"><strong id="fileName">video.mp4</strong><small id="fileSize"></small></div><button id="removeFile" class="remove-button" aria-label="Quitar video">×</button></div>
+          <video id="preview" class="preview hidden" controls playsinline></video>
+        </div>
+
+        <div class="panel settings-panel">
+          <div class="panel-heading"><div><div class="step">PASO 02</div><h2>Configura tu clip</h2></div><span class="heading-icon">⌘</span></div>
+          <div class="field"><label for="clipTitle">Nombre del clip</label><input id="clipTitle" type="text" value="Mi nuevo clip" maxlength="70" /></div>
+          <div class="time-fields"><div class="field"><label for="startTime">Inicio <span>HH:MM:SS</span></label><input id="startTime" type="text" value="00:00:00" inputmode="numeric" /></div><div class="field"><label for="endTime">Final <span>HH:MM:SS</span></label><input id="endTime" type="text" value="00:00:15" inputmode="numeric" /></div></div>
+          <div class="field"><label>Formato de salida</label><div class="format-options"><button class="format active" data-format="original"><span class="format-shape landscape"></span><span><strong>Original</strong><small>Conservar formato</small></span></button><button class="format" data-format="vertical"><span class="format-shape portrait"></span><span><strong>Vertical 9:16</strong><small>Reels, TikTok, Shorts</small></span></button></div></div>
+          <button id="createClip" class="primary-button" disabled><span>✦</span> Crear mi clip <span class="button-arrow">→</span></button>
+          <p class="privacy-note">◇ Tus archivos se procesan en este navegador.</p>
+        </div>
+      </section>
+
+      <section id="resultPanel" class="panel result-panel hidden"><div class="result-head"><div><div class="step">PASO 03</div><h2>Tu clip está listo</h2></div><span class="success-mark">✓</span></div><video id="resultVideo" controls playsinline></video><div class="result-actions"><strong id="resultName">Mi nuevo clip</strong><a id="downloadClip" class="download-button" download="clipai.mp4">↓ Descargar clip</a></div></section>
+      <section id="how" class="how-section"><div><div class="step">SENCILLO Y RÁPIDO</div><h2>De video largo a clip en tres pasos.</h2></div><div class="how-steps"><div><span>01</span><strong>Agrega</strong><p>Selecciona el video que quieres recortar.</p></div><div><span>02</span><strong>Personaliza</strong><p>Indica el inicio, el final y el formato.</p></div><div><span>03</span><strong>Descarga</strong><p>Guarda tu clip y compártelo donde quieras.</p></div></div></section>
+      <footer>© 2026 ClipAI <span>Hecho para crear más y editar menos.</span></footer>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+  <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
