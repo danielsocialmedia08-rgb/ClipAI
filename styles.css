@@ -6,3 +6,5 @@
 .youtube-preview{margin-top:16px;border:1px solid #34415b;border-radius:9px;overflow:hidden;background:#080d18}.youtube-preview iframe{display:block;width:100%;aspect-ratio:16/9;border:0}.youtube-preview p{margin:0;padding:9px 11px;color:#8794aa;font-size:10px;line-height:1.5}
 
 .preview-fallback{padding:11px;display:grid;grid-template-columns:1fr auto;gap:9px;align-items:center}.preview-fallback p{grid-column:1/-1;margin:0;color:#aab6c9;font-size:11px;line-height:1.55}.preview-fallback a,.preview-fallback button{font:600 10px "DM Sans";border-radius:6px;padding:9px 11px;text-decoration:none;cursor:pointer}.preview-fallback a{color:#d7ceff;background:#302a55;border:1px solid #5c4f9b}.preview-fallback button{color:#d5e9ff;background:#17324b;border:1px solid #345b7b}
+
+.direct-download{margin-top:18px;padding-top:15px;border-top:1px solid #28354b}.direct-download label{display:block;font-size:11px;color:#aab5c8;font-weight:600;margin-bottom:8px}.direct-download small{display:block;margin-top:7px;color:#7f8da4;font-size:10px;line-height:1.5}.direct-download button:disabled{opacity:.5;cursor:wait}
