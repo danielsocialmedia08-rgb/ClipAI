@@ -96,10 +96,42 @@ $("downloadFromUrl").addEventListener("click", async () => {
   const input = $("directVideoUrl");
   const raw = input.value.trim();
   let url;
-  try { url = new URL(raw); } catch { return toast("Pega un enlace HTTPS directo al archivo de video."); }
+  try { url = new URL(raw); } catch { return toast("Pega un enlace completo que comience con https://"); }
   if (url.protocol !== "https:") return toast("Por seguridad, utiliza un enlace HTTPS.");
-  if (/(^|\\.)?(youtube\\.com|youtu\\.be|kick\\.com|twitch\\.tv)$/i.test(url.hostname)) {
-    return toast("Ese es un enlace de plataforma, no un archivo directo. Usa una descarga oficial autorizada y luego importa el archivo.");
+  const host = url.hostname.toLowerCase().replace(/^www\./, "");
+  const message = $("sourceImportMessage");
+  const official = $("sourceOfficialLink");
+  message.classList.remove("hidden");
+  official.classList.add("hidden");
+  const showOfficial = (text, href, label = "Abrir opción oficial ↗") => {
+    message.textContent = text;
+    official.href = href;
+    official.textContent = label;
+    official.classList.remove("hidden");
+  };
+  if (["youtube.com","m.youtube.com","youtube-nocookie.com","youtu.be"].includes(host)) {
+    const ownStudio = "https://studio.youtube.com/";
+    showOfficial("YouTube no permite descargar videos de otros canales mediante esta función. Si el video es tuyo, descárgalo desde YouTube Studio y después súbelo a ClipAI.", ownStudio, "Abrir YouTube Studio ↗");
+    return;
+  }
+  if (host === "kick.com" || host.endsWith(".kick.com")) {
+    const parts = url.pathname.split("/").filter(Boolean);
+    if (parts[0] === "video" || parts[0] === "clips" || parts[0] === "clip") {
+      showOfficial("Abre el clip o VOD en Kick. Los clips disponibles muestran la opción Descargar en su página. Los VOD completos solo se descargan desde el panel del propietario del canal.", url.href, "Abrir video en Kick ↗");
+    } else {
+      showOfficial("Para descargar tus propios VOD de Kick, entra en Studio > VODs desde tu Creator Dashboard. Después sube el archivo a ClipAI.", "https://dashboard.kick.com/studio/vods", "Abrir VODs de Kick ↗");
+    }
+    return;
+  }
+  if (host === "twitch.tv" || host.endsWith(".twitch.tv")) {
+    const parts = url.pathname.split("/").filter(Boolean);
+    const isClip = parts[0] === "clip" || parts[0] === "clips";
+    if (isClip) {
+      showOfficial("Para clips de Twitch, la descarga automática requiere autorización OAuth del canal con permisos de editor. Abre el clip y usa las opciones disponibles en Twitch; luego sube el archivo a ClipAI.", url.href, "Abrir clip en Twitch ↗");
+    } else {
+      showOfficial("Para descargar tus propios VOD de Twitch, abre Video Producer y usa el menú del video. Después sube el archivo a ClipAI.", "https://dashboard.twitch.tv/content/video", "Abrir Video Producer ↗");
+    }
+    return;
   }
   const button = $("downloadFromUrl");
   button.disabled = true;
@@ -113,17 +145,18 @@ $("downloadFromUrl").addEventListener("click", async () => {
     if (blob.size > 13_500_000) throw new Error("El archivo supera 13.5 MB, el límite actual del análisis con IA.");
     const nameFromUrl = decodeURIComponent(url.pathname.split("/").pop() || "video-importado");
     const extension = type.includes("webm") ? ".webm" : type.includes("quicktime") ? ".mov" : ".mp4";
-    const name = /\\.(mp4|webm|mov)$/i.test(nameFromUrl) ? nameFromUrl : "video-importado" + extension;
-    const file = new File([blob], name, { type });
-    loadFile(file);
-    toast("Video importado correctamente. Ya puedes analizarlo.");
+    const name = /\.(mp4|webm|mov)$/i.test(nameFromUrl) ? nameFromUrl : "video-importado" + extension;
+    loadFile(new File([blob], name, { type }));
+    message.textContent = "Video importado correctamente. Ya puedes analizarlo.";
+    toast("Video importado correctamente.");
   } catch (error) {
     console.error(error);
     const corsHint = error instanceof TypeError ? " El servidor puede bloquear la importación desde otros sitios (CORS)." : "";
-    toast((error.message || "No se pudo importar el video.") + corsHint);
+    message.textContent = (error.message || "No se pudo importar el video.") + corsHint;
+    toast("No se pudo importar el video.");
   } finally {
     button.disabled = false;
-    button.textContent = "↓";
+    button.textContent = "Continuar";
   }
 });
 $("checkYoutube").addEventListener("click", () => {
