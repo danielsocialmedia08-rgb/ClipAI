@@ -352,7 +352,7 @@ $("createClip").addEventListener("click", async () => {
 });
 
 // Generador de videos IA (requiere el Worker seguro configurado en VIDEO_AI_API).
-const VIDEO_AI_API = ""; // Set this to the deployed Cloudflare Worker URL after deployment.
+const VIDEO_AI_API = "https://clipai-video.danielsocialmedia08.workers.dev";
 const videoAIPrompt = $("aiVideoPrompt");
 document.querySelectorAll("[data-prompt]").forEach(button => button.addEventListener("click", () => {
   videoAIPrompt.value = button.dataset.prompt;
