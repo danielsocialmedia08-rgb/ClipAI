@@ -75,8 +75,21 @@ document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click",
 }));
 $("checkYoutube").addEventListener("click", () => {
   const url = $("youtubeUrl").value.trim();
-  if (!/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//i.test(url)) return toast("Introduce un enlace válido de YouTube.");
-  toast("La importación desde YouTube se conectará en la siguiente etapa. Mientras tanto, sube el video descargado.");
+  let parsed;
+  try { parsed = new URL(url); } catch { return toast("Pega un enlace web válido que comience con https://"); }
+  const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+  const platforms = [
+    {name:"YouTube",domains:["youtube.com","youtu.be","m.youtube.com"]},
+    {name:"Twitch",domains:["twitch.tv","m.twitch.tv"]},
+    {name:"Kick",domains:["kick.com"]},
+    {name:"Facebook",domains:["facebook.com","fb.watch","m.facebook.com"]},
+    {name:"TikTok",domains:["tiktok.com","vm.tiktok.com"]},
+    {name:"Instagram",domains:["instagram.com"]},
+    {name:"X",domains:["x.com","twitter.com"]}
+  ];
+  const platform = platforms.find(p => p.domains.some(d => host === d || host.endsWith("." + d)));
+  if (!platform) return toast("Plataforma no reconocida todavía. Prueba YouTube, Kick, Twitch, Facebook, TikTok, Instagram o X.");
+  toast("Enlace de " + platform.name + " reconocido. La importación directa se habilitará al conectar el servidor de video.");
 });
 document.querySelectorAll(".format").forEach((button) => button.addEventListener("click", () => {
   document.querySelectorAll(".format").forEach((b) => b.classList.toggle("active", b === button));
