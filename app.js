@@ -5,6 +5,7 @@ let selectedFile = null;
 let outputUrl = null;
 let selectedFormat = "original";
 let ffmpegInstance = null;
+let analysisLogs = [];
 
 function toast(message) {
   const el = $("toast");
@@ -23,6 +24,7 @@ function formatBytes(bytes) {
 }
 function updateButton() {
   $("createClip").disabled = !selectedFile;
+  $("detectHighlights").disabled = !selectedFile;
 }
 function clearFile() {
   if (preview.src) URL.revokeObjectURL(preview.src);
@@ -86,7 +88,7 @@ async function getFFmpeg() {
   const { FFmpeg } = window.FFmpegWASM;
   const { toBlobURL } = window.FFmpegUtil;
   const ffmpeg = new FFmpeg();
-  ffmpeg.on("log", ({ message }) => console.log("[ClipAI]", message));
+  ffmpeg.on("log", ({ message }) => { console.log("[ClipAI]", message); analysisLogs.push(message); });
   const base = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd";
   await ffmpeg.load({
     coreURL: await toBlobURL(base + "/ffmpeg-core.js", "text/javascript"),
@@ -95,6 +97,52 @@ async function getFFmpeg() {
   ffmpegInstance = ffmpeg;
   return ffmpeg;
 }
+$("detectHighlights").addEventListener("click", async () => {
+  if (!selectedFile) return;
+  const button = $("detectHighlights");
+  button.disabled = true;
+  button.textContent = "Analizando audio del video…";
+  try {
+    const ffmpeg = await getFFmpeg();
+    const inputName = "clipai-analysis" + (selectedFile.name.match(/\\.[^.]+$/)?.[0] || ".mp4");
+    await ffmpeg.writeFile(inputName, new Uint8Array(await selectedFile.arrayBuffer()));
+    analysisLogs = [];
+    await ffmpeg.exec(["-i", inputName, "-af", "silencedetect=noise=-32dB:d=0.6", "-f", "null", "-"]);
+    const duration = Number.isFinite(preview.duration) ? preview.duration : 0;
+    const events = analysisLogs.join("\\n");
+    const starts = [...events.matchAll(/silence_start: ([0-9.]+)/g)].map(m => Number(m[1]));
+    const ends = [...events.matchAll(/silence_end: ([0-9.]+)/g)].map(m => Number(m[1]));
+    const active = [];
+    let cursor = 0;
+    for (let i = 0; i < starts.length; i++) {
+      const stop = starts[i];
+      if (stop > cursor) active.push({ start: cursor, end: stop, length: stop - cursor });
+      if (ends[i] !== undefined) cursor = ends[i];
+    }
+    if (duration > cursor) active.push({ start: cursor, end: duration, length: duration - cursor });
+    let best = active.filter(x => x.length >= 5).sort((a,b) => b.length-a.length)[0];
+    if (!best) {
+      const fallbackLength = Math.min(20, duration);
+      best = { start: Math.max(0, (duration - fallbackLength) / 2), end: Math.min(duration, (duration + fallbackLength) / 2), length: fallbackLength };
+    }
+    const clipLength = Math.min(30, best.length);
+    const start = best.start + Math.max(0, (best.length - clipLength) / 2);
+    const end = start + clipLength;
+    const toTime = value => [Math.floor(value/3600), Math.floor(value%3600/60), Math.floor(value%60)].map(n=>String(n).padStart(2,"0")).join(":");
+    $("startTime").value = toTime(start);
+    $("endTime").value = toTime(end);
+    $("clipTitle").value = "Mejor momento - ClipAI";
+    toast("¡Encontramos un momento destacado! Puedes ajustar los tiempos antes de crear el clip.");
+    await ffmpeg.deleteFile(inputName);
+  } catch (error) {
+    console.error(error);
+    toast("No se pudo analizar el audio. Inténtalo de nuevo.");
+  } finally {
+    button.disabled = false;
+    button.innerHTML = '<span>✦</span> Encontrar los mejores momentos <span class="ai-tag">AUTOMÁTICO</span>';
+    updateButton();
+  }
+});
 $("createClip").addEventListener("click", async () => {
   if (!selectedFile) return;
   const start = secondsFromTime($("startTime").value);
