@@ -28,7 +28,7 @@
     <main class="main">
       <header class="topbar"><div class="breadcrumb">ClipAI <span>/</span> <strong>Crear clips</strong></div><div class="top-actions"><span class="status-dot"></span><span>Procesamiento local</span><div class="top-avatar">C</div></div></header>
       <section class="welcome">
-        <div><div class="eyebrow"><span class="spark">✦</span> ESTUDIO DE VIDEO INTELIGENTE</div><h1>Convierte videos largos<br><span>en clips increíbles.</span></h1><p class="intro">Sube un video, elige el fragmento y prepara contenido listo para compartir.</p></div>
+        <div><div class="eyebrow"><span class="spark">✦</span> ESTUDIO DE VIDEO INTELIGENTE</div><h1>Convierte videos largos<br><span>en clips increíbles.</span></h1><p class="intro">Sube un video y deja que ClipAI encuentre los momentos que vale la pena compartir. También puedes elegirlos manualmente.</p></div>
         <div class="welcome-art"><div class="art-ring ring-one"></div><div class="art-ring ring-two"></div><div class="play-tile">▶</div><span class="art-spark spark-a">✦</span><span class="art-spark spark-b">✧</span></div>
       </section>
 
@@ -51,6 +51,7 @@
         <div class="panel settings-panel">
           <div class="panel-heading"><div><div class="step">PASO 02</div><h2>Configura tu clip</h2></div><span class="heading-icon">⌘</span></div>
           <div class="field"><label for="clipTitle">Nombre del clip</label><input id="clipTitle" type="text" value="Mi nuevo clip" maxlength="70" /></div>
+          <button id="detectHighlights" class="ai-button" disabled><span>✦</span> Encontrar los mejores momentos <span class="ai-tag">AUTOMÁTICO</span></button><p class="ai-note">Analiza el audio para localizar segmentos con actividad y sugerir un fragmento destacado.</p>
           <div class="time-fields"><div class="field"><label for="startTime">Inicio <span>HH:MM:SS</span></label><input id="startTime" type="text" value="00:00:00" inputmode="numeric" /></div><div class="field"><label for="endTime">Final <span>HH:MM:SS</span></label><input id="endTime" type="text" value="00:00:15" inputmode="numeric" /></div></div>
           <div class="field"><label>Formato de salida</label><div class="format-options"><button class="format active" data-format="original"><span class="format-shape landscape"></span><span><strong>Original</strong><small>Conservar formato</small></span></button><button class="format" data-format="vertical"><span class="format-shape portrait"></span><span><strong>Vertical 9:16</strong><small>Reels, TikTok, Shorts</small></span></button></div></div>
           <button id="createClip" class="primary-button" disabled><span>✦</span> Crear mi clip <span class="button-arrow">→</span></button>
@@ -59,7 +60,7 @@
       </section>
 
       <section id="resultPanel" class="panel result-panel hidden"><div class="result-head"><div><div class="step">PASO 03</div><h2>Tu clip está listo</h2></div><span class="success-mark">✓</span></div><video id="resultVideo" controls playsinline></video><div class="result-actions"><strong id="resultName">Mi nuevo clip</strong><a id="downloadClip" class="download-button" download="clipai.mp4">↓ Descargar clip</a></div></section>
-      <section id="how" class="how-section"><div><div class="step">SENCILLO Y RÁPIDO</div><h2>De video largo a clip en tres pasos.</h2></div><div class="how-steps"><div><span>01</span><strong>Agrega</strong><p>Selecciona el video que quieres recortar.</p></div><div><span>02</span><strong>Personaliza</strong><p>Indica el inicio, el final y el formato.</p></div><div><span>03</span><strong>Descarga</strong><p>Guarda tu clip y compártelo donde quieras.</p></div></div></section>
+      <section id="how" class="how-section"><div><div class="step">SENCILLO Y RÁPIDO</div><h2>De video largo a clip en tres pasos.</h2></div><div class="how-steps"><div><span>01</span><strong>Agrega</strong><p>Selecciona el video que quieres recortar.</p></div><div><span>02</span><strong>Detecta o personaliza</strong><p>Encuentra momentos automáticamente o ajusta los tiempos.</p></div><div><span>03</span><strong>Descarga</strong><p>Guarda tu clip y compártelo donde quieras.</p></div></div></section>
       <footer>© 2026 ClipAI <span>Hecho para crear más y editar menos.</span></footer>
     </main>
   </div>
