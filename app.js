@@ -110,49 +110,72 @@ async function getFFmpeg() {
   ffmpegInstance = ffmpeg;
   return ffmpeg;
 }
+async function fileToBase64(file) {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
 $("detectHighlights").addEventListener("click", async () => {
   if (!selectedFile) return;
   const button = $("detectHighlights");
   button.disabled = true;
-  button.textContent = "Analizando audio del video…";
+  button.textContent = "La IA está analizando tu video…";
   try {
-    const ffmpeg = await getFFmpeg();
-    const inputName = "clipai-analysis" + (selectedFile.name.match(/\.[^.]+$/)?.[0] || ".mp4");
-    await ffmpeg.writeFile(inputName, new Uint8Array(await selectedFile.arrayBuffer()));
-    analysisLogs = [];
-    await ffmpeg.exec(["-i", inputName, "-af", "silencedetect=noise=-32dB:d=0.6", "-f", "null", "-"]);
-    const duration = Number.isFinite(preview.duration) ? preview.duration : 0;
-    const events = analysisLogs.join("\n");
-    const starts = [...events.matchAll(/silence_start: ([0-9.]+)/g)].map(m => Number(m[1]));
-    const ends = [...events.matchAll(/silence_end: ([0-9.]+)/g)].map(m => Number(m[1]));
-    const active = [];
-    let cursor = 0;
-    for (let i = 0; i < starts.length; i++) {
-      const stop = starts[i];
-      if (stop > cursor) active.push({ start: cursor, end: stop, length: stop - cursor });
-      if (ends[i] !== undefined) cursor = ends[i];
+    if (selectedFile.size > 13_500_000) {
+      throw new Error("Para este primer análisis, usa un video de menos de 13.5 MB. Después ampliaremos el límite.");
     }
-    if (duration > cursor) active.push({ start: cursor, end: duration, length: duration - cursor });
-    let best = active.filter(x => x.length >= 5).sort((a,b) => b.length-a.length)[0];
-    if (!best) {
-      const fallbackLength = Math.min(20, duration);
-      best = { start: Math.max(0, (duration - fallbackLength) / 2), end: Math.min(duration, (duration + fallbackLength) / 2), length: fallbackLength };
+
+    const videoBase64 = await fileToBase64(selectedFile);
+    const response = await fetch("https://clipai-api.danielsocialmedia08.workers.dev/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        videoBase64,
+        mimeType: selectedFile.type || "video/mp4"
+      })
+    });
+
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) {
+      throw new Error(payload.error || "No se pudo analizar el video con Gemini.");
     }
-    const clipLength = Math.min(30, best.length);
-    const start = best.start + Math.max(0, (best.length - clipLength) / 2);
-    const end = start + clipLength;
-    const toTime = value => [Math.floor(value/3600), Math.floor(value%3600/60), Math.floor(value%60)].map(n=>String(n).padStart(2,"0")).join(":");
-    $("startTime").value = toTime(start);
-    $("endTime").value = toTime(end);
-    $("clipTitle").value = "Mejor momento - ClipAI";
-    toast("¡Encontramos un momento destacado! Puedes ajustar los tiempos antes de crear el clip.");
-    await ffmpeg.deleteFile(inputName);
+
+    const moments = payload.result?.moments;
+    if (!Array.isArray(moments) || moments.length === 0) {
+      throw new Error("La IA no encontró momentos claros. Prueba con otro video.");
+    }
+
+    const validMoments = moments
+      .filter(m => Number.isFinite(Number(m.start)) && Number.isFinite(Number(m.end)) &&
+        Number(m.end) > Number(m.start) && Number(m.start) >= 0)
+      .sort((a, b) => Number(b.end) - Number(b.start));
+
+    if (!validMoments.length) {
+      throw new Error("La IA devolvió tiempos que no son válidos. Inténtalo de nuevo.");
+    }
+
+    const best = validMoments[0];
+    const duration = Number.isFinite(preview.duration) ? preview.duration : Number(best.end);
+    const clipStart = Math.max(0, Math.min(Number(best.start), duration));
+    const clipEnd = Math.max(clipStart + 1, Math.min(Number(best.end), duration));
+    const toTime = value => [Math.floor(value / 3600), Math.floor(value % 3600 / 60), Math.floor(value % 60)]
+      .map(n => String(n).padStart(2, "0")).join(":");
+
+    $("startTime").value = toTime(clipStart);
+    $("endTime").value = toTime(clipEnd);
+    $("clipTitle").value = (best.title || "Mejor momento - ClipAI").slice(0, 70);
+    toast("¡Gemini encontró " + validMoments.length + " momento(s)! Revisa el fragmento y crea tu clip.");
   } catch (error) {
     console.error(error);
-    toast("No se pudo analizar el audio. Inténtalo de nuevo.");
+    toast(error.message || "No se pudo analizar el video.");
   } finally {
     button.disabled = false;
-    button.innerHTML = '<span>✦</span> Encontrar los mejores momentos <span class="ai-tag">AUTOMÁTICO</span>';
+    button.innerHTML = '<span>✦</span> Encontrar los mejores momentos <span class="ai-tag">IA GEMINI</span>';
     updateButton();
   }
 });
