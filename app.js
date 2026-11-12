@@ -171,7 +171,21 @@ $("createClip").addEventListener("click", async () => {
     const outputName = "clipai-output.mp4";
     await ffmpeg.writeFile(inputName, new Uint8Array(await selectedFile.arrayBuffer()));
     const args = ["-ss", String(start), "-i", inputName, "-t", String(end - start)];
-    if (selectedFormat === "vertical") args.push("-vf", "scale=720:1280:force_original_aspect_ratio=decrease,pad=720:1280:(ow-iw)/2:(oh-ih)/2");
+    const style = $("clipStyle").value;
+    const visualFilters = [];
+    if (selectedFormat === "vertical") {
+      visualFilters.push("scale=720:1280:force_original_aspect_ratio=decrease", "pad=720:1280:(ow-iw)/2:(oh-ih)/2");
+    }
+    const looks = {
+      viral: "eq=contrast=1.12:saturation=1.18:brightness=0.01",
+      funny: "eq=contrast=1.08:saturation=1.28:brightness=0.02",
+      gaming: "eq=contrast=1.18:saturation=1.22",
+      podcast: "eq=contrast=1.06:saturation=0.92:brightness=0.01",
+      clean: "eq=contrast=1.03:saturation=1.04"
+    };
+    if (looks[style]) visualFilters.push(looks[style]);
+    if ($("effectsMode").checked) visualFilters.push("unsharp=5:5:0.65:3:3:0.25", "vignette=PI/5");
+    if (visualFilters.length) args.push("-vf", visualFilters.join(","));
     args.push("-c:v", "libx264", "-preset", "ultrafast", "-crf", "23", "-c:a", "aac", "-movflags", "+faststart", outputName);
     button.textContent = "Creando clip…";
     await ffmpeg.exec(args);
