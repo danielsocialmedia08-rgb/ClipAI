@@ -73,23 +73,30 @@ document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click",
   $("youtubePane").classList.toggle("hidden", !youtube);
   if (!youtube && !selectedFile) $("uploadPane").classList.remove("hidden");
 }));
+function getYouTubeVideoId(url) {
+  const host = url.hostname.toLowerCase().replace(/^www\\./, "");
+  if (host === "youtu.be") return url.pathname.split("/").filter(Boolean)[0] || null;
+  if (host === "youtube.com" || host === "m.youtube.com" || host === "youtube-nocookie.com") {
+    if (url.pathname === "/watch") return url.searchParams.get("v");
+    const parts = url.pathname.split("/").filter(Boolean);
+    if (["embed", "shorts", "live", "v"].includes(parts[0])) return parts[1] || null;
+  }
+  return null;
+}
 $("checkYoutube").addEventListener("click", () => {
-  const url = $("youtubeUrl").value.trim();
+  const raw = $("youtubeUrl").value.trim();
   let parsed;
-  try { parsed = new URL(url); } catch { return toast("Pega un enlace web válido que comience con https://"); }
-  const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
-  const platforms = [
-    {name:"YouTube",domains:["youtube.com","youtu.be","m.youtube.com"]},
-    {name:"Twitch",domains:["twitch.tv","m.twitch.tv"]},
-    {name:"Kick",domains:["kick.com"]},
-    {name:"Facebook",domains:["facebook.com","fb.watch","m.facebook.com"]},
-    {name:"TikTok",domains:["tiktok.com","vm.tiktok.com"]},
-    {name:"Instagram",domains:["instagram.com"]},
-    {name:"X",domains:["x.com","twitter.com"]}
-  ];
-  const platform = platforms.find(p => p.domains.some(d => host === d || host.endsWith("." + d)));
-  if (!platform) return toast("Plataforma no reconocida todavía. Prueba YouTube, Kick, Twitch, Facebook, TikTok, Instagram o X.");
-  toast("Enlace de " + platform.name + " reconocido. La importación directa se habilitará al conectar el servidor de video.");
+  try { parsed = new URL(raw); } catch { return toast("Pega un enlace válido de YouTube que comience con https://"); }
+  if (parsed.protocol !== "https:") return toast("Por seguridad, utiliza un enlace HTTPS.");
+  const videoId = getYouTubeVideoId(parsed);
+  if (!videoId || !/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
+    $("youtubePreview").classList.add("hidden");
+    $("youtubeFrame").src = "about:blank";
+    return toast("No pude identificar un video de YouTube. Comprueba que sea un enlace público.");
+  }
+  $("youtubeFrame").src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(videoId);
+  $("youtubePreview").classList.remove("hidden");
+  toast("¡Video de YouTube cargado! Ya puedes verlo aquí.");
 });
 document.querySelectorAll(".format").forEach((button) => button.addEventListener("click", () => {
   document.querySelectorAll(".format").forEach((b) => b.classList.toggle("active", b === button));
