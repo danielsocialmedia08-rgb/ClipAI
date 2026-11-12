@@ -83,20 +83,62 @@ function getYouTubeVideoId(url) {
   }
   return null;
 }
+function resetPlatformPreview() {
+  $("youtubeFrame").src = "about:blank";
+  $("youtubePreview").classList.add("hidden");
+}
+$("switchToUpload").addEventListener("click", () => {
+  resetPlatformPreview();
+  document.querySelector('.tab[data-tab="upload"]').click();
+  fileInput.click();
+});
 $("checkYoutube").addEventListener("click", () => {
   const raw = $("youtubeUrl").value.trim();
   let parsed;
-  try { parsed = new URL(raw); } catch { return toast("Pega un enlace válido de YouTube que comience con https://"); }
+  try { parsed = new URL(raw); } catch { return toast("Pega un enlace completo que comience con https://"); }
   if (parsed.protocol !== "https:") return toast("Por seguridad, utiliza un enlace HTTPS.");
-  const videoId = getYouTubeVideoId(parsed);
-  if (!videoId || !/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
-    $("youtubePreview").classList.add("hidden");
-    $("youtubeFrame").src = "about:blank";
-    return toast("No pude identificar un video de YouTube. Comprueba que sea un enlace público.");
+  const host = parsed.hostname.toLowerCase().replace(/^www\\./, "");
+  let embed = "";
+  let message = "";
+  if (["youtube.com","m.youtube.com","youtube-nocookie.com","youtu.be"].includes(host)) {
+    const id = getYouTubeVideoId(parsed);
+    if (!id || !/^[a-zA-Z0-9_-]{11}$/.test(id)) return toast("No pude identificar el video de YouTube. Revisa el enlace.");
+    embed = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id);
+    message = "Si YouTube muestra restricción de edad, bloqueo de inserción o pantalla negra, abre el original o sube un archivo que tengas autorización para usar. ClipAI no puede quitar esas restricciones.";
+  } else if (host === "twitch.tv" || host.endsWith(".twitch.tv")) {
+    const parts = parsed.pathname.split("/").filter(Boolean);
+    const parent = "danielsocialmedia08-rgb.github.io";
+    if (parts[0] === "videos" && /^\\d+$/.test(parts[1] || "")) {
+      embed = "https://player.twitch.tv/?video=" + encodeURIComponent("v" + parts[1]) + "&parent=" + parent;
+    } else if (parts[0] === "clip" && parts[1]) {
+      embed = "https://clips.twitch.tv/embed?clip=" + encodeURIComponent(parts[1]) + "&parent=" + parent;
+    } else if (parts[0] && parts[0] !== "directory") {
+      embed = "https://player.twitch.tv/?channel=" + encodeURIComponent(parts[0]) + "&parent=" + parent;
+    } else {
+      return toast("Pega un enlace de canal, VOD o clip de Twitch.");
+    }
+    message = "Vista previa de Twitch. Algunos VOD, canales o clips pueden requerir inicio de sesión o no permitir inserción.";
+  } else if (host === "kick.com" || host.endsWith(".kick.com")) {
+    const parts = parsed.pathname.split("/").filter(Boolean);
+    if (parts.length === 1 && !["categories","videos","clips"].includes(parts[0])) {
+      embed = "https://player.kick.com/" + encodeURIComponent(parts[0]);
+      message = "Vista previa del canal de Kick. Los VOD y clips pueden no admitir inserción; si no aparecen, abre el original o sube un archivo autorizado.";
+    } else {
+      message = "Este enlace de Kick parece ser un VOD o clip. Ábrelo en Kick; si tienes permiso para editarlo, descarga el archivo desde las opciones oficiales y súbelo a ClipAI.";
+    }
+  } else {
+    return toast("Por ahora, pega un enlace de YouTube, Twitch o Kick.");
   }
-  $("youtubeFrame").src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(videoId);
+  $("openOriginal").href = parsed.href;
+  $("previewMessage").textContent = message;
+  if (embed) {
+    $("youtubeFrame").src = embed;
+    $("youtubeFrame").title = "Vista previa de " + host;
+  } else {
+    $("youtubeFrame").src = "about:blank";
+  }
   $("youtubePreview").classList.remove("hidden");
-  toast("¡Video de YouTube cargado! Ya puedes verlo aquí.");
+  toast(embed ? "Vista previa preparada. La reproducción depende de la plataforma." : "Enlace reconocido. Usa Abrir video original.");
 });
 document.querySelectorAll(".format").forEach((button) => button.addEventListener("click", () => {
   document.querySelectorAll(".format").forEach((b) => b.classList.toggle("active", b === button));
