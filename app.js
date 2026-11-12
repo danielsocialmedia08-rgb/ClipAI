@@ -92,6 +92,40 @@ $("switchToUpload").addEventListener("click", () => {
   document.querySelector('.tab[data-tab="upload"]').click();
   fileInput.click();
 });
+$("downloadFromUrl").addEventListener("click", async () => {
+  const input = $("directVideoUrl");
+  const raw = input.value.trim();
+  let url;
+  try { url = new URL(raw); } catch { return toast("Pega un enlace HTTPS directo al archivo de video."); }
+  if (url.protocol !== "https:") return toast("Por seguridad, utiliza un enlace HTTPS.");
+  if (/(^|\\.)?(youtube\\.com|youtu\\.be|kick\\.com|twitch\\.tv)$/i.test(url.hostname)) {
+    return toast("Ese es un enlace de plataforma, no un archivo directo. Usa una descarga oficial autorizada y luego importa el archivo.");
+  }
+  const button = $("downloadFromUrl");
+  button.disabled = true;
+  button.textContent = "…";
+  try {
+    const response = await fetch(url.href);
+    if (!response.ok) throw new Error("El servidor no permitió descargar el archivo (HTTP " + response.status + ").");
+    const blob = await response.blob();
+    const type = (blob.type || response.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+    if (!type.startsWith("video/")) throw new Error("El enlace no devolvió un archivo de video. Necesitas un enlace directo MP4, WebM o MOV.");
+    if (blob.size > 13_500_000) throw new Error("El archivo supera 13.5 MB, el límite actual del análisis con IA.");
+    const nameFromUrl = decodeURIComponent(url.pathname.split("/").pop() || "video-importado");
+    const extension = type.includes("webm") ? ".webm" : type.includes("quicktime") ? ".mov" : ".mp4";
+    const name = /\\.(mp4|webm|mov)$/i.test(nameFromUrl) ? nameFromUrl : "video-importado" + extension;
+    const file = new File([blob], name, { type });
+    loadFile(file);
+    toast("Video importado correctamente. Ya puedes analizarlo.");
+  } catch (error) {
+    console.error(error);
+    const corsHint = error instanceof TypeError ? " El servidor puede bloquear la importación desde otros sitios (CORS)." : "";
+    toast((error.message || "No se pudo importar el video.") + corsHint);
+  } finally {
+    button.disabled = false;
+    button.textContent = "↓";
+  }
+});
 $("checkYoutube").addEventListener("click", () => {
   const raw = $("youtubeUrl").value.trim();
   let parsed;
