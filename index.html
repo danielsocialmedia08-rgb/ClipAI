@@ -16,7 +16,8 @@
       <a class="brand" href="#"><span class="brand-mark">C</span><span>Clip<span class="brand-accent">AI</span></span></a>
       <div class="workspace-label">ESPACIO DE TRABAJO</div>
       <nav>
-        <a class="nav-item active" href="#"><span>▦</span> Crear clips</a>
+        <a class="nav-item active" href="#clips"><span>▦</span> Crear clips</a>
+        <a class="nav-item" href="#videoAI"><span>✧</span> Crear videos con IA</a>
         <a class="nav-item" href="#how"><span>✧</span> Cómo funciona</a>
       </nav>
       <div class="sidebar-bottom">
@@ -32,7 +33,7 @@
         <div class="welcome-art"><div class="art-ring ring-one"></div><div class="art-ring ring-two"></div><div class="play-tile">▶</div><span class="art-spark spark-a">✦</span><span class="art-spark spark-b">✧</span></div>
       </section>
 
-      <section class="creator-grid">
+      <section id="clips" class="creator-grid">
         <div class="panel source-panel">
           <div class="panel-heading"><div><div class="step">PASO 01</div><h2>Agrega tu video</h2></div><span class="heading-icon">↗</span></div>
           <div class="source-tabs"><button class="tab active" data-tab="upload">Subir archivo</button><button class="tab" data-tab="youtube">Enlace de plataforma</button></div>
@@ -69,6 +70,32 @@
         </div>
       </section>
 
+
+      <section id="videoAI" class="panel video-ai-panel">
+        <div class="panel-heading"><div><div class="step">ESTUDIO CREATIVO · IA GENERATIVA</div><h2>Crear videos desde una idea</h2></div><span class="heading-icon">✦</span></div>
+        <p class="video-ai-intro">Describe lo que imaginas y genera un video original con IA. No necesitas subir un video.</p>
+        <div class="video-ai-layout">
+          <div class="video-ai-controls">
+            <div class="field"><label for="aiVideoPrompt">¿Qué video quieres crear?</label><textarea id="aiVideoPrompt" rows="4" maxlength="1800" placeholder="Ej.: Un león caminando lentamente por una ciudad futurista de noche, luces de neón, estilo cinematográfico..."></textarea></div>
+            <div class="ai-topic-list"><span>Ideas:</span><button type="button" data-prompt="Un gol espectacular en un estadio de fútbol lleno, cámara lenta cinematográfica">Fútbol</button><button type="button" data-prompt="Un gamer profesional gana una partida épica en un setup futurista con luces RGB">Gaming</button><button type="button" data-prompt="Una historia de terror: una figura misteriosa aparece al final de un pasillo oscuro">Terror</button><button type="button" data-prompt="Un automóvil deportivo atraviesa una carretera costera al atardecer, tomas cinematográficas">Autos</button><button type="button" data-prompt="Un paisaje de fantasía con montañas flotantes, cascadas y criaturas luminosas">Fantasía</button><button type="button" data-prompt="Un video motivacional de una persona entrenando al amanecer y superando sus límites">Motivación</button></div>
+            <div class="video-ai-options">
+              <div class="field"><label for="aiVideoRatio">Formato</label><select id="aiVideoRatio"><option value="9:16">Vertical 9:16 · TikTok / Reels / Shorts</option><option value="16:9">Horizontal 16:9 · YouTube</option><option value="1:1">Cuadrado 1:1</option></select></div>
+              <div class="field"><label for="aiVideoDuration">Duración</label><select id="aiVideoDuration"><option value="5">5 segundos</option><option value="10">10 segundos</option></select></div>
+            </div>
+            <label class="ai-audio-choice"><input id="aiVideoAudio" type="checkbox" checked><span><strong>Generar audio</strong><small>Cuando el modelo lo admita</small></span></label>
+            <button id="generateAIVideo" class="primary-button" type="button"><span>✦</span> Generar video con IA <span class="button-arrow">→</span></button>
+            <p class="video-ai-cost-note">La generación utiliza un servicio externo de pago por uso. No se iniciará ningún cobro hasta que conectemos y configures el proveedor.</p>
+            <p id="aiVideoStatus" class="ai-video-status hidden" role="status" aria-live="polite"></p>
+          </div>
+          <div class="video-ai-preview">
+            <div class="video-ai-preview-art"><div class="video-ai-orbit"></div><div class="video-ai-orbit orbit-two"></div><div class="video-ai-spark">✦</div><div class="video-ai-play">▶</div></div>
+            <strong>Tu próxima idea puede convertirse en video</strong>
+            <p>Escribe una descripción, elige el formato y genera tu primera escena.</p>
+            <video id="aiGeneratedVideo" class="hidden" controls playsinline></video>
+            <a id="aiVideoDownload" class="download-button hidden" download="clipai-video-ia.mp4">↓ Descargar video generado</a>
+          </div>
+        </div>
+      </section>
       <section id="resultPanel" class="panel result-panel hidden"><div class="result-head"><div><div class="step">PASO 03</div><h2>Tu clip está listo</h2></div><span class="success-mark">✓</span></div><video id="resultVideo" controls playsinline></video><div class="result-actions"><strong id="resultName">Mi nuevo clip</strong><a id="downloadClip" class="download-button" download="clipai.mp4">↓ Descargar clip</a></div></section>
       <section id="how" class="how-section"><div><div class="step">SENCILLO Y RÁPIDO</div><h2>De video largo a clip en tres pasos.</h2></div><div class="how-steps"><div><span>01</span><strong>Agrega</strong><p>Selecciona el video que quieres recortar.</p></div><div><span>02</span><strong>Detecta o personaliza</strong><p>Encuentra momentos automáticamente o ajusta los tiempos.</p></div><div><span>03</span><strong>Descarga</strong><p>Guarda tu clip y compártelo donde quieras.</p></div></div></section>
       <footer>© 2026 ClipAI <span>Hecho para crear más y editar menos.</span></footer>
