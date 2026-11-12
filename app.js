@@ -97,7 +97,7 @@ $("checkYoutube").addEventListener("click", () => {
   let parsed;
   try { parsed = new URL(raw); } catch { return toast("Pega un enlace completo que comience con https://"); }
   if (parsed.protocol !== "https:") return toast("Por seguridad, utiliza un enlace HTTPS.");
-  const host = parsed.hostname.toLowerCase().replace(/^www\\./, "");
+  const host = parsed.hostname.toLowerCase().replace("www.", "");
   let embed = "";
   let message = "";
   if (["youtube.com","m.youtube.com","youtube-nocookie.com","youtu.be"].includes(host)) {
@@ -108,7 +108,7 @@ $("checkYoutube").addEventListener("click", () => {
   } else if (host === "twitch.tv" || host.endsWith(".twitch.tv")) {
     const parts = parsed.pathname.split("/").filter(Boolean);
     const parent = "danielsocialmedia08-rgb.github.io";
-    if (parts[0] === "videos" && /^\\d+$/.test(parts[1] || "")) {
+    if (parts[0] === "videos" && /^[0-9]+$/.test(parts[1] || "")) {
       embed = "https://player.twitch.tv/?video=" + encodeURIComponent("v" + parts[1]) + "&parent=" + parent;
     } else if (parts[0] === "clip" && parts[1]) {
       embed = "https://clips.twitch.tv/embed?clip=" + encodeURIComponent(parts[1]) + "&parent=" + parent;
