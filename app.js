@@ -350,3 +350,71 @@ $("createClip").addEventListener("click", async () => {
     updateButton();
   }
 });
+
+// Generador de videos IA (requiere el Worker seguro configurado en VIDEO_AI_API).
+const VIDEO_AI_API = "https://clipai-video-api.danielsocialmedia08.workers.dev";
+const videoAIPrompt = $("aiVideoPrompt");
+document.querySelectorAll("[data-prompt]").forEach(button => button.addEventListener("click", () => {
+  videoAIPrompt.value = button.dataset.prompt;
+  videoAIPrompt.focus();
+}));
+$("generateAIVideo").addEventListener("click", async () => {
+  const prompt = videoAIPrompt.value.trim();
+  const status = $("aiVideoStatus");
+  const button = $("generateAIVideo");
+  if (prompt.length < 8) {
+    status.textContent = "Describe tu idea con un poco más de detalle para generar un mejor resultado.";
+    status.classList.remove("hidden");
+    return;
+  }
+  if (!VIDEO_AI_API || VIDEO_AI_API.includes("TU_WORKER")) {
+    status.textContent = "El generador ya está preparado en ClipAI, pero falta conectar el servicio seguro de generación. La clave del proveedor debe guardarse en el servidor, nunca aquí en la página.";
+    status.classList.remove("hidden");
+    return;
+  }
+  button.disabled = true;
+  button.textContent = "Enviando a la IA…";
+  status.textContent = "Preparando tu solicitud. La generación puede tardar varios minutos.";
+  status.classList.remove("hidden");
+  try {
+    const response = await fetch(VIDEO_AI_API + "/generate-video", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        prompt,
+        duration: $("aiVideoDuration").value,
+        aspect_ratio: $("aiVideoRatio").value,
+        generate_audio: $("aiVideoAudio").checked
+      })
+    });
+    const payload = await response.json();
+    if (!response.ok || !payload.request_id) throw new Error(payload.error || "No se pudo iniciar la generación.");
+    const requestId = payload.request_id;
+    let completed = false;
+    for (let attempt = 0; attempt < 90; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      const poll = await fetch(VIDEO_AI_API + "/generate-video?id=" + encodeURIComponent(requestId));
+      const result = await poll.json();
+      if (!poll.ok) throw new Error(result.error || "No se pudo consultar el progreso.");
+      if (result.status === "COMPLETED" && result.video_url) {
+        const video = $("aiGeneratedVideo");
+        video.src = result.video_url;
+        video.classList.remove("hidden");
+        $("aiVideoDownload").href = result.video_url;
+        $("aiVideoDownload").classList.remove("hidden");
+        status.textContent = "¡Tu video está listo! Puedes reproducirlo y descargarlo.";
+        completed = true;
+        break;
+      }
+      if (result.status === "FAILED") throw new Error(result.error || "El proveedor no pudo generar el video.");
+      status.textContent = result.status === "IN_PROGRESS" ? "La IA está creando tu video… (" + (attempt + 1) + "/90)" : "Tu solicitud está en cola…";
+    }
+    if (!completed) throw new Error("La generación está tardando más de lo esperado. Intenta consultar de nuevo en unos minutos.");
+  } catch (error) {
+    console.error(error);
+    status.textContent = error.message || "Ocurrió un error al generar el video.";
+  } finally {
+    button.disabled = false;
+    button.innerHTML = '<span>✦</span> Generar video con IA <span class="button-arrow">→</span>';
+  }
+});
