@@ -35,14 +35,13 @@
       <section class="creator-grid">
         <div class="panel source-panel">
           <div class="panel-heading"><div><div class="step">PASO 01</div><h2>Agrega tu video</h2></div><span class="heading-icon">↗</span></div>
-          <div class="source-tabs"><button class="tab active" data-tab="upload">Subir archivo</button><button class="tab" data-tab="youtube">Enlace de YouTube</button></div>
+          <div class="source-tabs"><button class="tab active" data-tab="upload">Subir archivo</button><button class="tab" data-tab="youtube">Enlace de plataforma</button></div>
           <div id="uploadPane" class="dropzone">
             <input id="videoFile" type="file" accept="video/*" hidden />
             <div class="upload-icon">↑</div><strong>Arrastra tu video aquí</strong><p>o <button class="text-button" id="browseBtn">explora tus archivos</button></p><small>MP4, MOV, WEBM · El procesamiento se realiza en tu navegador</small>
           </div>
           <div id="youtubePane" class="youtube-pane hidden">
-            <label for="youtubeUrl">URL del video</label><div class="url-input"><span>▶</span><input id="youtubeUrl" type="url" placeholder="https://www.youtube.com/watch?v=..." /><button id="checkYoutube" aria-label="Comprobar enlace">→</button></div>
-            <p class="hint">La importación directa desde YouTube estará disponible cuando conectemos el servicio de procesamiento. Por ahora puedes subir un archivo de video.</p>
+            <label for="youtubeUrl">Pega el enlace de tu video, directo o VOD</label><div class="url-input"><span>↗</span><input id="youtubeUrl" type="url" placeholder="https://www.twitch.tv/... o cualquier plataforma" /><button id="checkYoutube" aria-label="Comprobar enlace">→</button></div><div class="platform-chips"><span>YouTube</span><span>Kick</span><span>Twitch</span><span>Facebook</span><span>TikTok</span><span>Instagram</span><span>X</span></div><p class="hint">Acepta enlaces públicos de videos y VOD. La descarga directa requiere conectar el servicio de importación; algunos enlaces privados, en vivo o protegidos pueden no estar disponibles.</p>
           </div>
           <div id="fileInfo" class="file-info hidden"><div class="file-icon">▶</div><div class="file-details"><strong id="fileName">video.mp4</strong><small id="fileSize"></small></div><button id="removeFile" class="remove-button" aria-label="Quitar video">×</button></div>
           <video id="preview" class="preview hidden" controls playsinline></video>
@@ -54,6 +53,14 @@
           <button id="detectHighlights" class="ai-button" disabled><span>✦</span> Encontrar los mejores momentos <span class="ai-tag">AUTOMÁTICO</span></button><p class="ai-note">Analiza el audio para localizar segmentos con actividad y sugerir un fragmento destacado.</p>
           <div class="time-fields"><div class="field"><label for="startTime">Inicio <span>HH:MM:SS</span></label><input id="startTime" type="text" value="00:00:00" inputmode="numeric" /></div><div class="field"><label for="endTime">Final <span>HH:MM:SS</span></label><input id="endTime" type="text" value="00:00:15" inputmode="numeric" /></div></div>
           <div class="field"><label>Formato de salida</label><div class="format-options"><button class="format active" data-format="original"><span class="format-shape landscape"></span><span><strong>Original</strong><small>Conservar formato</small></span></button><button class="format" data-format="vertical"><span class="format-shape portrait"></span><span><strong>Vertical 9:16</strong><small>Reels, TikTok, Shorts</small></span></button></div></div>
+          <div class="customize-card">
+            <div class="customize-heading"><div><label>Personalización con IA</label><small>Deja que ClipAI le dé personalidad al clip</small></div><span class="ai-tag">IA</span></div>
+            <label class="choice-row"><input id="memeMode" type="checkbox" checked><span><strong>Memes y reacciones actuales</strong><small>Memes relacionados con el momento y tendencias</small></span></label>
+            <label class="choice-row"><input id="captionMode" type="checkbox" checked><span><strong>Subtítulos dinámicos</strong><small>Palabras clave resaltadas en pantalla</small></span></label>
+            <label class="choice-row"><input id="effectsMode" type="checkbox"><span><strong>Zooms y efectos automáticos</strong><small>Énfasis en reacciones y momentos clave</small></span></label>
+            <div class="field style-field"><label for="clipStyle">Estilo del clip</label><select id="clipStyle"><option value="viral">Viral / streamer</option><option value="funny">Humor y memes</option><option value="gaming">Gaming</option><option value="podcast">Podcast / entrevista</option><option value="clean">Limpio y profesional</option></select></div>
+            <p class="hint">Estas preferencias preparan la edición inteligente. Para generar memes recientes, subtítulos y efectos automáticamente hay que conectar el motor de IA.</p>
+          </div>
           <button id="createClip" class="primary-button" disabled><span>✦</span> Crear mi clip <span class="button-arrow">→</span></button>
           <p class="privacy-note">◇ Tus archivos se procesan en este navegador.</p>
         </div>
