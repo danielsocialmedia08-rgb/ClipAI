@@ -104,12 +104,12 @@ $("detectHighlights").addEventListener("click", async () => {
   button.textContent = "Analizando audio del video…";
   try {
     const ffmpeg = await getFFmpeg();
-    const inputName = "clipai-analysis" + (selectedFile.name.match(/\\.[^.]+$/)?.[0] || ".mp4");
+    const inputName = "clipai-analysis" + (selectedFile.name.match(/\.[^.]+$/)?.[0] || ".mp4");
     await ffmpeg.writeFile(inputName, new Uint8Array(await selectedFile.arrayBuffer()));
     analysisLogs = [];
     await ffmpeg.exec(["-i", inputName, "-af", "silencedetect=noise=-32dB:d=0.6", "-f", "null", "-"]);
     const duration = Number.isFinite(preview.duration) ? preview.duration : 0;
-    const events = analysisLogs.join("\\n");
+    const events = analysisLogs.join("\n");
     const starts = [...events.matchAll(/silence_start: ([0-9.]+)/g)].map(m => Number(m[1]));
     const ends = [...events.matchAll(/silence_end: ([0-9.]+)/g)].map(m => Number(m[1]));
     const active = [];
