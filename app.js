@@ -74,7 +74,7 @@ document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click",
   if (!youtube && !selectedFile) $("uploadPane").classList.remove("hidden");
 }));
 function getYouTubeVideoId(url) {
-  const host = url.hostname.toLowerCase().replace(/^www\\./, "");
+  const host = url.hostname.toLowerCase().replace(/^www\./, "");
   if (host === "youtu.be") return url.pathname.split("/").filter(Boolean)[0] || null;
   if (host === "youtube.com" || host === "m.youtube.com" || host === "youtube-nocookie.com") {
     if (url.pathname === "/watch") return url.searchParams.get("v");
